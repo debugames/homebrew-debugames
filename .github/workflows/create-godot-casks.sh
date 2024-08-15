@@ -56,75 +56,75 @@ for release in $releases; do
     
     cat > "$output_dir/$rb_file" <<EOF
 cask "godot@$version" do
-    version "$version"
-    sha256 "$macos_sha256"
+  version "$version"
+  sha256 "$macos_sha256"
 
-    url "$macos_url",
-        verified: "github.com/$GODOT_REPO/"
-    name "Godot Engine"
-    desc "Game development engine"
-    homepage "https://godotengine.org/"
+  url "$macos_url",
+    verified: "github.com/$GODOT_REPO/"
+  name "Godot Engine"
+  desc "Game development engine"
+  homepage "https://godotengine.org/"
 
-    livecheck do
-        url :url
-        regex(/^v?(\d+(?:\.\d+)+)[._-]stable$/i)
-        strategy :github_latest
-    end
+  livecheck do
+    url :url
+    regex(/^v?(\d+(?:\.\d+)+)[._-]stable$/i)
+    strategy :github_latest
+  end
 
-    depends_on macos: ">= :$required_macos_version"
+  depends_on macos: ">= :$required_macos_version"
 
-    app "Godot.app"
-    binary "#{appdir}/Godot.app/Contents/MacOS/Godot", target: "godot"
+  app "Godot.app"
+  binary "#{appdir}/Godot.app/Contents/MacOS/Godot", target: "godot"
 
-    uninstall quit: "org.godotengine.godot"
+  uninstall quit: "org.godotengine.godot"
 
-    zap trash: [
-        "~/Library/Application Support/Godot",
-        "~/Library/Caches/Godot",
-        "~/Library/Saved Application State/org.godotengine.godot.savedState",
-    ]
+  zap trash: [
+    "~/Library/Application Support/Godot",
+    "~/Library/Caches/Godot",
+    "~/Library/Saved Application State/org.godotengine.godot.savedState",
+  ]
 end
 EOF
 
     cat > "$output_dir/$rb_mono_file" <<EOF
 cask "godot-mono@$version" do
-    version "$version"
-    sha256 "$macos_mono_sha256"
+  version "$version"
+  sha256 "$macos_mono_sha256"
 
-    url "$macos_mono_url",
-        verified: "github.com/$GODOT_REPO/"
-    name "Godot Engine"
-    desc "C# scripting capable version of Godot game engine"
-    homepage "https://godotengine.org/"
+  url "$macos_mono_url",
+    verified: "github.com/$GODOT_REPO/"
+  name "Godot Engine"
+  desc "C# scripting capable version of Godot game engine"
+  homepage "https://godotengine.org/"
 
-    livecheck do
-        url :url
-        regex(/^v?(\d+(?:\.\d+)+)[._-]stable$/i)
-        strategy :github_latest
-    end
+  livecheck do
+    url :url
+    regex(/^v?(\d+(?:\.\d+)+)[._-]stable$/i)
+    strategy :github_latest
+  end
 
-    depends_on cask: "dotnet-sdk"
-    depends_on macos: ">= :$required_macos_version"
+  depends_on cask: "dotnet-sdk"
+  depends_on macos: ">= :$required_macos_version"
 
-    app "Godot_mono.app"
-    # shim script (https://github.com/Homebrew/homebrew-cask/issues/18809)
-    shimscript = "#{staged_path}/godot-mono.wrapper.sh"
-    binary shimscript, target: "godot-mono"
+  app "Godot_mono.app"
+  # shim script (https://github.com/Homebrew/homebrew-cask/issues/18809)
+  shimscript = "#{staged_path}/godot-mono.wrapper.sh"
+  binary shimscript, target: "godot-mono"
 
-    preflight do
-        File.write shimscript, <<~EOS
-            #!/bin/bash
-            '#{appdir}/Godot_mono.app/Contents/MacOS/Godot' "\$@"
-        EOS
-    end
+  preflight do
+    File.write shimscript, <<~EOS
+      #!/bin/bash
+      '#{appdir}/Godot_mono.app/Contents/MacOS/Godot' "\$@"
+    EOS
+  end
 
-    uninstall quit: "org.godotengine.godot"
+  uninstall quit: "org.godotengine.godot"
 
-    zap trash: [
-        "~/Library/Application Support/Godot",
-        "~/Library/Caches/Godot",
-        "~/Library/Saved Application State/org.godotengine.godot.savedState",
-    ]
+  zap trash: [
+    "~/Library/Application Support/Godot",
+    "~/Library/Caches/Godot",
+    "~/Library/Saved Application State/org.godotengine.godot.savedState",
+  ]
 end
 EOF
 done
