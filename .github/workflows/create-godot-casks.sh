@@ -29,13 +29,13 @@ while true; do
 done
 
 for release in $releases; do
-    echo "Processing release $release"
+    echo "Processing release $release:"
     version=$(echo $release | sed -E 's/^v//;s/-stable$//') # remove 'v' prefix and '-stable' suffix
     rb_file="godot@$version.rb"
     rb_mono_file="godot-mono@$version.rb"
     # if both rb_file and rb_mono_file already exist, then skip
     if [ -f "$output_dir/$rb_file" ] && [ -f "$output_dir/$rb_mono_file" ]; then
-        echo "Cask $rb_file and $rb_mono_file already exist"
+        echo "  Cask $rb_file and $rb_mono_file already exist"
         continue
     fi
     major=$(echo $version | cut -d. -f1)
@@ -51,8 +51,12 @@ for release in $releases; do
     macos_mono_url=($(echo $res | jq -r '.assets[] | select(.name | contains("macos") or contains("osx")) | select(.name | contains("mono")) | .browser_download_url'))
     macos_sha256=$(curl -# -L $macos_url | shasum -a 256 | cut -d' ' -f1)
     macos_mono_sha256=$(curl -# -L $macos_mono_url | shasum -a 256 | cut -d' ' -f1)
-
-    required_macos_version="high_sierra" # if required_macos_version become higher in some future major or minor version, then change it here
+    # For future updates, it may be necessary to change the required macOS version on specific major or minor versions
+    required_macos_version="high_sierra"
+    required_macos_mono_version="sierra"
+    # If there is a version in the URL, replace it with #{version} to make it the same as the original Homebrew.
+    macos_url=$(echo $macos_url | sed -E "s/($version)/\#\{version\}/g")
+    macos_mono_url=$(echo $macos_mono_url | sed -E "s/($version)/\#\{version\}/g")
     
     cat > "$output_dir/$rb_file" <<EOF
 cask "godot@$version" do
@@ -60,7 +64,7 @@ cask "godot@$version" do
   sha256 "$macos_sha256"
 
   url "$macos_url",
-    verified: "github.com/$GODOT_REPO/"
+      verified: "github.com/$GODOT_REPO/"
   name "Godot Engine"
   desc "Game development engine"
   homepage "https://godotengine.org/"
@@ -71,6 +75,7 @@ cask "godot@$version" do
     strategy :github_latest
   end
 
+  conflicts_with cask: "godot@3"
   depends_on macos: ">= :$required_macos_version"
 
   app "Godot.app"
@@ -92,7 +97,7 @@ cask "godot-mono@$version" do
   sha256 "$macos_mono_sha256"
 
   url "$macos_mono_url",
-    verified: "github.com/$GODOT_REPO/"
+      verified: "github.com/$GODOT_REPO/"
   name "Godot Engine"
   desc "C# scripting capable version of Godot game engine"
   homepage "https://godotengine.org/"
@@ -104,7 +109,7 @@ cask "godot-mono@$version" do
   end
 
   depends_on cask: "dotnet-sdk"
-  depends_on macos: ">= :$required_macos_version"
+  depends_on macos: ">= :$required_macos_mono_version"
 
   app "Godot_mono.app"
   # shim script (https://github.com/Homebrew/homebrew-cask/issues/18809)

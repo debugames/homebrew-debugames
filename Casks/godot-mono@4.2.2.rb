@@ -1,4 +1,4 @@
-cask "godot-mono" do
+cask "godot-mono@4.2.2" do
   version "4.2.2"
   sha256 "c3449e432de65d938bb7421930b288034d4ede82b9fdb9c1d03a200d5f15e7f6"
 
