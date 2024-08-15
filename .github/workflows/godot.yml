@@ -1,0 +1,26 @@
+name: Create Godot's ruby file of Casks
+on:
+    workflow_dispatch:
+    # 毎日 0:00 に実行
+    schedule:
+        - cron: '0 0 * * *'
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
+            - name: Setup Ruby
+              uses: ruby/setup-ruby@v1
+              with:
+                  ruby-version: 2.7
+            - name: Install bundler
+              run: gem install bundler
+            - name: Install dependencies
+              run: bundle install
+            - name: Run script
+              run: bundle exec ruby create_casks.rb
+            - name: Commit and push
+              run: |
+                  git config --global user.name 'GitHub Actions'
+                  git config --global user.email '
