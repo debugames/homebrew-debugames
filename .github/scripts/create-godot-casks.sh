@@ -40,7 +40,7 @@ for release in $releases; do
     minor=$(echo $version | cut -d. -f2); minor=${minor:-0}
     patch=$(echo $version | cut -d. -f3); patch=${patch:-0}
     if [ $major -le 3 ]; then
-        echo "  Ignoring version 3.X or lower ($version)"
+        echo "  Ignoring 3.X or lower"
         continue
     fi
     rb_file="godot@$version.rb"
