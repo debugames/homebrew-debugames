@@ -33,15 +33,13 @@ while true; do
 done
 
 # Setup all versions and all mono versions (all godot@[version] + godot + godot@3 or godot-mono@[version] + godot-mono + godot-mono@3)
-all_versions=""
-all_mono_versions=""
+all_versions="godot godot@3"
+all_mono_versions="godot-mono godot-mono@3"
 for release in $releases; do
   version=$(echo $release | sed -E 's/^v//;s/-stable$//') # remove 'v' prefix and '-stable' suffix
   all_versions="$all_versions godot@$version"
   all_mono_versions="$all_mono_versions godot-mono@$version"
 done
-all_versions="$all_versions godot godot@3"
-all_mono_versions="$all_mono_versions godot-mono godot-mono@3"
 
 for release in $releases; do
   version=$(echo $release | sed -E 's/^v//;s/-stable$//') # remove 'v' prefix and '-stable' suffix
@@ -141,6 +139,8 @@ EOF
     conflicts_with_cask_mono="$conflicts_with_cask_mono\n    \"$v\","
   done
   conflicts_with_cask="$conflicts_with_cask\n  ]"
+  echo "  printing conflicts_with_cask_mono"
+  printf "$conflicts_with_cask_mono"
   if [ $major -ge 3 ]; then # 3.X or higher
     cat > "$output_dir/$rb_mono_file" <<EOF
 cask "godot-mono@$version" do
