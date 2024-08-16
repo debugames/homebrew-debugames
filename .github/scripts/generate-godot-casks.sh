@@ -66,7 +66,9 @@ for release in $releases; do
   if [ $major -eq 4 ] && [ $minor -ge 2 ]; then # 4.2 or higher
     depends_on_macos='depends_on macos: ">= :high_sierra"'
   fi
-  # For vanilla version (not Mono)
+  ##################################
+  # For vanilla version (not Mono) #
+  ##################################
   # Get macOS download URL, download it, and calculate SHA256
   res=$(gh api "repos/$GODOT_REPO/releases/tags/$release")
   macos_url=($(echo $res | jq -r '.assets[] | select(.name | contains("macos") or contains("osx")) | select(.name | contains("mono") | not) | .browser_download_url'))
@@ -123,7 +125,9 @@ EOF
   fi
   echo "  $rb_file is created"
   
-  # For Mono version
+  ####################
+  # For Mono version #
+  ####################
   macos_mono_url=($(echo $res | jq -r '.assets[] | select(.name | contains("macos") or contains("osx")) | select(.name | contains("mono")) | .browser_download_url'))
   if [ -z "$macos_mono_url" ]; then
     echo "  No macOS Mono download URL found in the release $release"
@@ -138,9 +142,7 @@ EOF
     fi
     conflicts_with_cask_mono="$conflicts_with_cask_mono\n    \"$v\","
   done
-  conflicts_with_cask="$conflicts_with_cask\n  ]"
-  echo "  printing conflicts_with_cask_mono"
-  printf "$conflicts_with_cask_mono"
+  conflicts_with_cask_mono="$conflicts_with_cask_mono\n  ]"
   if [ $major -ge 3 ]; then # 3.X or higher
     cat > "$output_dir/$rb_mono_file" <<EOF
 cask "godot-mono@$version" do
@@ -159,7 +161,7 @@ cask "godot-mono@$version" do
     strategy :github_latest
   end
 
-  $(printf "$conflicts_with_cask")
+  $(printf "$conflicts_with_cask_mono")
   depends_on cask: "dotnet-sdk"
   $depends_on_macos
 
