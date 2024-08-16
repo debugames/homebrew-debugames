@@ -85,8 +85,9 @@ for release in $releases; do
     if [ "$v" == "godot@$version" ]; then
       continue
     fi
-    conflicts_with_cask="$conflicts_with_cask\n  \"$v\","
+    conflicts_with_cask="$conflicts_with_cask\n    \"$v\","
   done
+  conflicts_with_cask="$conflicts_with_cask\n  ]"
   # Create a cask file
   if [ $major -ge 3 ]; then # 3.X or higher
     cat > "$output_dir/$rb_file" <<EOF
@@ -137,8 +138,9 @@ EOF
     if [ "$v" == "godot-mono@$version" ]; then
       continue
     fi
-    conflicts_with_cask_mono="$conflicts_with_cask_mono\n  \"$v\","
+    conflicts_with_cask_mono="$conflicts_with_cask_mono\n    \"$v\","
   done
+  conflicts_with_cask="$conflicts_with_cask\n  ]"
   if [ $major -ge 3 ]; then # 3.X or higher
     cat > "$output_dir/$rb_mono_file" <<EOF
 cask "godot-mono@$version" do
