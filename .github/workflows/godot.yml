@@ -11,7 +11,7 @@ on:
   schedule:
     - cron: '0 0 * * *'
 jobs:
-  generate:
+  generate_casks:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -31,7 +31,7 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add -A
-          git diff-index --quiet HEAD || git commit -m "Update Godot's ruby file of Casks"
+          git diff-index --quiet HEAD || git commit -m "Update Godot's Casks by CI"
       - name: Push
         uses: ad-m/github-push-action@master
         with:
