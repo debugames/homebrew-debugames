@@ -14,6 +14,7 @@ cask "godot-mono@4.1.2" do
     strategy :github_latest
   end
 
+  conflicts_with cask: "godot@3"
   depends_on cask: "dotnet-sdk"
   depends_on macos: ">= :sierra"
 
