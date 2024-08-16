@@ -1,6 +1,11 @@
 name: Create Godot's ruby file of Casks
 on: 
   workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force to run the workflow'
+        required: false
+        default: 'false'
   # 毎日 0:00 に実行
   schedule:
     - cron: '0 0 * * *'
@@ -15,7 +20,9 @@ jobs:
         uses: actions/checkout@v4
       - name: Run script
         run: |
-          ./.github/scripts/create-godot-casks.sh Casks/
+          force_flag=""
+          [ "${{ github.event.inputs.force }}" = "true" ] && force_flag="-f"
+          ./.github/scripts/create-godot-casks.sh Casks $force_flag
         env:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Commit
