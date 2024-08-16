@@ -1,4 +1,4 @@
-name: Create Godot's ruby file of Casks
+name: Generate Godot's Casks
 on: 
   workflow_dispatch:
     inputs:
