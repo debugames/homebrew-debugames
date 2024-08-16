@@ -14,8 +14,9 @@ cask "godot-mono@4.2.2" do
     strategy :github_latest
   end
 
+  conflicts_with cask: "godot@3"
   depends_on cask: "dotnet-sdk"
-  depends_on macos: ">= :sierra"
+  depends_on macos: ">= :high_sierra"
 
   app "Godot_mono.app"
   # shim script (https://github.com/Homebrew/homebrew-cask/issues/18809)
