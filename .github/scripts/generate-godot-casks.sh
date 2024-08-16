@@ -106,7 +106,7 @@ cask "godot@$version" do
     strategy :github_latest
   end
 
-  $conflicts_with_cask
+  $(echo -e $conflicts_with_cask)
   $depends_on_macos
 
   app "Godot.app"
@@ -157,7 +157,7 @@ cask "godot-mono@$version" do
     strategy :github_latest
   end
 
-  $conflicts_with_cask_mono
+  $(echo -e $conflicts_with_cask)
   depends_on cask: "dotnet-sdk"
   $depends_on_macos
 
