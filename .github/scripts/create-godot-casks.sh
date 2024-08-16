@@ -45,7 +45,7 @@ for release in $releases; do
     fi
     rb_file="godot@$version.rb"
     rb_mono_file="godot-mono@$version.rb"
-    if [ -f "$output_dir/$rb_file" ] && [ -f "$output_dir/$rb_mono_file" ]; then
+    if [ -f "$output_dir/$rb_file" ] && [ -f "$output_dir/$rb_mono_file" ] && [ $force_overwrite == false ]; then
         echo "  Cask $rb_file and $rb_mono_file already exist"
         continue
     fi

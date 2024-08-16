@@ -19,8 +19,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: echo inputs
-        run: echo ${{ github.event.inputs.force }}
       - name: Run script
         run: |
           force_flag=""
