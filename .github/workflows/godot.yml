@@ -23,7 +23,7 @@ jobs:
         run: |
           force_flag=""
           [ "${{ github.event.inputs.force }}" = "true" ] && force_flag="-f"
-          ./.github/scripts/create-godot-casks.sh Casks $force_flag
+          ./.github/scripts/generate-godot-casks.sh Casks $force_flag
         env:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Commit
