@@ -47,7 +47,7 @@ for release in $releases; do
   minor=$(echo $version | cut -d. -f2); minor=${minor:-0}
   patch=$(echo $version | cut -d. -f3); patch=${patch:-0}
   if [ $major -le 2 ]; then
-    echo "Ignore release $version (because of 3.X or lower)"
+    echo "Ignore release $version because it's older than 2.X"
     continue
   fi
   echo "Processing release $release:"
