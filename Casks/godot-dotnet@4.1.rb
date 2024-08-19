@@ -17,15 +17,15 @@ cask "godot-dotnet@4.1" do
   depends_on cask: "dotnet-sdk"
   depends_on macos: ">= :sierra"
 
-  app "Godot_dotnet.app"
+  app "Godot_mono.app"
   # shim script (https://github.com/Homebrew/homebrew-cask/issues/18809)
-  shimscript = "#{staged_path}/godot-dotnet.wrapper.sh"
-  binary shimscript, target: "godot-dotnet"
+  shimscript = "#{staged_path}/godot-mono.wrapper.sh"
+  binary shimscript, target: "godot-mono"
 
   preflight do
     File.write shimscript, <<~EOS
       #!/bin/bash
-      '#{appdir}/Godot_dotnet.app/Contents/MacOS/Godot' "$@"
+      '#{appdir}/Godot_mono.app/Contents/MacOS/Godot' "$@"
     EOS
   end
 
