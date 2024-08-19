@@ -20,6 +20,9 @@ if [ $# -eq 2 ] && [ "$2" = "-f" ]; then
   force_overwrite=true
 fi
 
+# Make output directory
+mkdir -p "$output_dir"
+
 # Fetch all releases of Godot
 releases=''
 page=1
