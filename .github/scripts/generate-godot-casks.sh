@@ -48,7 +48,7 @@ for release in $releases; do
   # If the cask files already exist and force_overwrite is false, skip it
   rb_file="godot@$version.rb"
   rb_mono_file="godot-mono@$version.rb" # <= Godot 3
-  rb_dotnet_file="godot-mono@$version.rb" # >= Godot 4
+  rb_dotnet_file="godot-mono@$version.rb" # >= Godot 4. Godot 4 don't use Mono anymore, but the app name is still Godot_mono.app
   if [ $major -eq 3 ]; then
     if [ -f "$output_dir/$rb_file" ] && [ -f "$output_dir/$rb_mono_file" ] && [ $force_overwrite = false ]; then
       echo "  Cask $rb_file and $rb_mono_file already exist"
