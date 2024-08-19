@@ -16,7 +16,7 @@ if [ $# -lt 1 ] || [ $# -gt 2 ]; then
 fi
 output_dir=$1
 force_overwrite=false
-if [ $# -eq 2 ] && [ "$2" == "-f" ]; then
+if [ $# -eq 2 ] && [ "$2" = "-f" ]; then
   force_overwrite=true
 fi
 
@@ -32,15 +32,6 @@ while true; do
   fi
 done
 
-# Setup all versions and all mono versions (all godot@[version] + godot + godot@3 or godot-mono@[version] + godot-mono + godot-mono@3)
-all_versions="godot godot@3"
-all_mono_versions="godot-mono godot-mono@3"
-for release in $releases; do
-  version=$(echo $release | sed -E 's/^v//;s/-stable$//') # remove 'v' prefix and '-stable' suffix
-  all_versions="$all_versions godot@$version"
-  all_mono_versions="$all_mono_versions godot-mono@$version"
-done
-
 for release in $releases; do
   version=$(echo $release | sed -E 's/^v//;s/-stable$//') # remove 'v' prefix and '-stable' suffix
   major=$(echo $version | cut -d. -f1); major=${major:-0} # if major is empty, set it to 0
@@ -53,11 +44,20 @@ for release in $releases; do
   echo "Processing release $release:"
   # If the cask files already exist and force_overwrite is false, skip it
   rb_file="godot@$version.rb"
-  rb_mono_file="godot-mono@$version.rb"
-  if [ -f "$output_dir/$rb_file" ] && [ -f "$output_dir/$rb_mono_file" ] && [ $force_overwrite == false ]; then
-    echo "  Cask $rb_file and $rb_mono_file already exist"
-    continue
+  rb_mono_file="godot-mono@$version.rb" # <= Godot 3
+  rb_dotnet_file="godot-dotnet@$version.rb" # >= Godot 4
+  if [ $major -eq 3 ]; then
+    if [ -f "$output_dir/$rb_file" ] && [ -f "$output_dir/$rb_mono_file" ] && [ $force_overwrite = false ]; then
+      echo "  Cask $rb_file and $rb_mono_file already exist"
+      continue
+    fi
+  elif [ $major -eq 4 ]; then
+    if [ -f "$output_dir/$rb_file" ] && [ -f "$output_dir/$rb_dotnet_file" ] && [ $force_overwrite = false ]; then
+      echo "  Cask $rb_file and $rb_dotnet_file already exist"
+      continue
+    fi
   fi
+
   # Set required macOS version depending on the Godot version
   depends_on_macos=''
   if [ $major -ge 3 ]; then # 3.X or higher
@@ -66,9 +66,9 @@ for release in $releases; do
   if [ $major -eq 4 ] && [ $minor -ge 2 ]; then # 4.2 or higher
     depends_on_macos='depends_on macos: ">= :high_sierra"'
   fi
-  ##################################
-  # For vanilla version (not Mono) #
-  ##################################
+  ############################################
+  # For vanilla version (not Mono or Dotnet) #
+  ############################################
   # Get macOS download URL, download it, and calculate SHA256
   res=$(gh api "repos/$GODOT_REPO/releases/tags/$release")
   macos_url=($(echo $res | jq -r '.assets[] | select(.name | contains("macos") or contains("osx")) | select(.name | contains("mono") | not) | .browser_download_url'))
@@ -79,15 +79,6 @@ for release in $releases; do
   macos_sha256=$(curl -sL $macos_url | shasum -a 256 | cut -d' ' -f1)
   # Replace version with #{version} in URL. (Same as the original Homebrew cask)
   macos_url=$(echo $macos_url | sed -E "s/($version)/\#\{version\}/g")
-  # Set conflicts_with (excluding current version from $all_versions)
-  conflicts_with_cask="conflicts_with cask: ["
-  for v in $all_versions; do
-    if [ "$v" == "godot@$version" ]; then
-      continue
-    fi
-    conflicts_with_cask="$conflicts_with_cask\n    \"$v\","
-  done
-  conflicts_with_cask="$conflicts_with_cask\n  ]"
   # Create a cask file
   if [ $major -ge 3 ]; then # 3.X or higher
     cat > "$output_dir/$rb_file" <<EOF
@@ -107,7 +98,6 @@ cask "godot@$version" do
     strategy :github_latest
   end
 
-  $(printf "$conflicts_with_cask")
   $depends_on_macos
 
   app "Godot.app"
@@ -125,31 +115,23 @@ EOF
   fi
   echo "  $rb_file is created"
   
-  ####################
-  # For Mono version #
-  ####################
-  macos_mono_url=($(echo $res | jq -r '.assets[] | select(.name | contains("macos") or contains("osx")) | select(.name | contains("mono")) | .browser_download_url'))
-  if [ -z "$macos_mono_url" ]; then
-    echo "  No macOS Mono download URL found in the release $release"
+  ##############################
+  # For Mono or Dotnet version #
+  ##############################
+  macos_mono_dotnet_url=($(echo $res | jq -r '.assets[] | select(.name | contains("macos") or contains("osx")) | select(.name | contains("mono")) | .browser_download_url'))
+  if [ -z "$macos_mono_dotnet_url" ]; then
+    echo "  No macOS Mono or Dotnet download URL found in the release $release"
     exit 1
   fi
-  macos_mono_sha256=$(curl -sL $macos_mono_url | shasum -a 256 | cut -d' ' -f1)
-  macos_mono_url=$(echo $macos_mono_url | sed -E "s/($version)/\#\{version\}/g")
-  conflicts_with_cask_mono="conflicts_with cask: ["
-  for v in $all_mono_versions; do
-    if [ "$v" == "godot-mono@$version" ]; then
-      continue
-    fi
-    conflicts_with_cask_mono="$conflicts_with_cask_mono\n    \"$v\","
-  done
-  conflicts_with_cask_mono="$conflicts_with_cask_mono\n  ]"
-  if [ $major -ge 3 ]; then # 3.X or higher
+  macos_mono_dotnet_sha256=$(curl -sL $macos_mono_dotnet_url | shasum -a 256 | cut -d' ' -f1)
+  macos_mono_dotnet_url=$(echo $macos_mono_dotnet_url | sed -E "s/($version)/\#\{version\}/g")
+  if [ $major -eq 3 ]; then # 3.X
     cat > "$output_dir/$rb_mono_file" <<EOF
 cask "godot-mono@$version" do
   version "$version"
-  sha256 "$macos_mono_sha256"
+  sha256 "$macos_mono_dotnet_sha256"
 
-  url "$macos_mono_url",
+  url "$macos_mono_dotnet_url",
       verified: "github.com/$GODOT_REPO/"
   name "Godot Engine"
   desc "C# scripting capable version of Godot game engine"
@@ -161,7 +143,6 @@ cask "godot-mono@$version" do
     strategy :github_latest
   end
 
-  $(printf "$conflicts_with_cask_mono")
   depends_on cask: "dotnet-sdk"
   $depends_on_macos
 
@@ -186,8 +167,49 @@ cask "godot-mono@$version" do
   ]
 end
 EOF
+    echo "  $rb_mono_file is created"
+  elif [ $major -ge 4 ]; then # Godot >= 4.X
+    cat > "$output_dir/$rb_dotnet_file" <<EOF
+cask "godot-dotnet@$version" do
+  version "$version"
+  sha256 "$macos_mono_dotnet_sha256"
+
+  url "$macos_mono_dotnet_url",
+      verified: "github.com/$GODOT_REPO/"
+  name "Godot Engine"
+  desc "C# scripting capable version of Godot game engine"
+  homepage "https://godotengine.org/"
+
+  livecheck do
+    url :url
+    regex(/^v?(\d+(?:\.\d+)+)[._-]stable$/i)
+    strategy :github_latest
+  end
+
+  depends_on cask: "dotnet-sdk"
+  $depends_on_macos
+
+  app "Godot_mono.app"
+  # shim script (https://github.com/Homebrew/homebrew-cask/issues/18809)
+  shimscript = "#{staged_path}/godot-mono.wrapper.sh"
+  binary shimscript, target: "godot-mono"
+
+  preflight do
+    File.write shimscript, <<~EOS
+      #!/bin/bash
+      '#{appdir}/Godot_mono.app/Contents/MacOS/Godot' "\$@"
+    EOS
+  end
+
+  uninstall quit: "org.godotengine.godot"
+
+  zap trash: [
+    "~/Library/Application Support/Godot",
+    "~/Library/Caches/Godot",
+    "~/Library/Saved Application State/org.godotengine.godot.savedState",
+  ]
+end
+EOF
+    echo "  $rb_dotnet_file is created"
   fi
-  echo "  $rb_mono_file is created"
 done
-
-
