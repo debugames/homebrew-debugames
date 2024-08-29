@@ -8,4 +8,4 @@ brew install godot@4.2.2
 ```
 
 ## Casks
-- All stable versions of Godot >= 3.0
+- Godot >= 3.0 (only stable versions)
